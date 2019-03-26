@@ -16,18 +16,20 @@
 # ==============================================================================
 
 
-if [[ -d preprocessed ]] && [[ -d raw ]]; then
+if [[ -d preprocessed ]]; then
     echo "data exist"
     exit 0
 else
-    wget -c https://aipedataset.cdn.bcebos.com/dureader/dureader_raw.zip
+    # download preprocessed data
     wget -c https://aipedataset.cdn.bcebos.com/dureader/dureader_preprocessed.zip
+    # download trained model parameters
+    wget -c 
+    # download vocabularies
+    wget -c 
+
+    # decompression
+    unzip dureader_preprocessed.zip
+    unzip saved_model.zip
+    unzip vocab.zip
 fi
 
-if md5sum --status -c md5sum.txt; then
-    unzip dureader_raw.zip
-    unzip dureader_preprocessed.zip
-else
-    echo "download data error!" >> /dev/stderr
-    exit 1
-fi
