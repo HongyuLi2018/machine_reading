@@ -1,43 +1,43 @@
 # 简介
 
-## Task Definition
-In machine reading comprehension (MRC) tasks, a query (Q) and one or more related paragraphs (Ps) or documents (Ds) will be provided. Machine is requeired to find out the correct answer (A) within the given paragrashs or documents (i.e. P + Q or D => A). Machine reading comprehension is a crucial task in natural-language processing (NLP) and requires deep understanding of languages. 
+## 机器阅读理解任务
+在机器阅读理解(MRC)任务中，我们会给定一个问题(Q)以及一个或多个段落(P)/文档(D)，然后利用机器在给定的段落中寻找正确答案(A)，即Q + P or D => A. 机器阅读理解(MRC)是自然语言处理(NLP)中的关键任务之一，需要机器对语言有深刻的理解才能找到正确的答案。
 
 ## DuReader数据集
-DuReader is a new large-scale real-world and human sourced MRC dataset in Chinese. DuReader focuses on real-world open-domain question answering. The advantages of DuReader over existing datasets are concluded as follows:
+DuReader是一个大规模、面向真实应用、由人类生成的中文阅读理解数据集。DuReader聚焦于真实世界中的不限定领域的问答任务。相较于其他阅读理解数据集，DuReader的优势包括:
 
- - Real question
- - Real article
- - Real answer
- - Real application scenario
- - Rich annotation
+ - 问题来自于真实的搜索日志
+ - 文章内容来自于真实网页
+ - 答案由人类生成
+ - 面向真实应用场景
+ - 标注更加丰富细致
 
-For more details about DuReader dataset please refer to [DuReader Homepage](https://ai.baidu.com//broad/subordinate?dataset=dureader).
+更多关于DuReader数据集的详细信息可在[DuReader官网](https://ai.baidu.com//broad/subordinate?dataset=dureader)找到。
 
 ## DuReader基线系统
 
-The DuReader baseline system implements and upgrades a classic reading comprehension model [BiDAF](https://arxiv.org/abs/1611.01603) on the [DuReader dataset](https://ai.baidu.com//broad/subordinate?dataset=dureader) with [PaddlePaddle](http://paddlepaddle.org) framework. The performance of this baseline system on the DuReader 2.0 dataset is shown below
-
+DuReader基线系统利用[PaddlePaddle](http://paddlepaddle.org)深度学习框架，针对[DuReader阅读理解数据集](https://ai.baidu.com//broad/subordinate?dataset=dureader)实现并升级了一个经典的阅读理解模型 —— [BiDAF](https://arxiv.org/abs/1611.01603). 该基线系统相较于DuReader论文中的基线，效果上有了大幅提升(在DuReader2.0验证集、测试集的表现见下表)
+  
 |      Model     | Dev ROUGE-L | Test ROUGE-L |
 | :------------- | :---------: | :----------: |
-| BiDAF (original DuReader [paper](https://arxiv.org/abs/1711.05073)) |    39.29    |     45.90    |
-| This baseline system  |    47.65    |     54.58    |
+| BiDAF (原始[论文](https://arxiv.org/abs/1711.05073)基线) |    39.29    |     45.90    |
+| 本基线系统  |    47.65    |     54.58    |
+
 
 # 快速开始
 
 ## 安装
 
 ### 安装PaddlePaddle
-To install PaddlePaddle, please refer to [this guide](http://www.paddlepaddle.org/#quick-start). This baseline system has been tested on python 2.7.13 and PaddlePaddle 1.3.1
-
-### 克隆基线系统代码
+DuReader基线系统基于python 2.7.13以及PaddlePaddle 1.3.1，关于PaddlePaddle框架的安装教程，详见[PaddlePaddle官方网站](http://www.paddlepaddle.org/#quick-start)。
+### 下载基线系统代码
 
 ```
-git clone https://github.com/xxx
+git clone https://github.com/xxx && cd xxx
 ```
 
-### Download Thirdparty Dependencies
-We use Bleu and Rouge as evaluation metrics, the calculation of these metrics relies on the scoring scripts under "https://github.com/tylin/coco-caption", to download them, run:
+### 下载第三方依赖
+在本基线系统中，我们采用了Bleu以及Rouge-L指标作为模型的评估标准。这些指标的计算脚本位于"https://github.com/tylin/coco-caption"，可以通过运行以下命令进行下载
 
 ```
 cd utils && bash download_thirdparty.sh
@@ -45,70 +45,73 @@ cd utils && bash download_thirdparty.sh
 
 ## 运行
 
-### Download Dataset and model
-To Download the DuReader 2.0 dataset, trained model parameters and vocabularies, please run:
+### 下载数据集以及模型
+为了方便开发者进行测试，我们提供了预处理(分词、计算answer span等)过后的DuReader 2.0数据集、训练好的模型参数以及词表。通过运行以下命令即可下载：
 
 ```
 cd data && bash download.sh
 ```
 
-#### Paragraph Extraction
-We incorporate a new strategy of paragraph extraction to improve the model performance. The details have been noted in `paddle/UPDATES.md`. Please run the following command to apply the new strategy of paragraph extraction on each document:
+### 段落抽取
+我们采用了一种新的段落抽取策略以提升模型在DuReader 2.0数据集上的表现(策略内容详见src/UPDATES.md)。该段落抽取策略可通过运行以下命令执行:
 
 ```
 sh run.sh --para_extraction
 ```
 
-Note that the full preprocessed dataset should be downloaded before running this command (see the section above). The results of paragraph extraction will be saved in `data/extracted/`. 
+请注意，在运行上面命令之前，需要先下载预处之后的DuReader 2.0数据 (见”下载数据集以及模型“章节)。段落抽取得到的结果会存放在
+`data/extracted/`文件夹中。
 
-#### Evaluate
-To evaluate on the DuReader devset with the provided model parameters, please run the following command:
+### 评估
+通过运行以下命令，开发者可以利用上面提供的模型在DuReader 2.0验证集进行评估：
 
 ```
 sh run.sh --evaluate  --load_dir ../data/saved_model --devset ../data/extracted/devset/zhidao.dev.json ../data/extracted/devset/search.dev.json
 ```
-The ROUGE-L metric will be calculated automatically after the evaluation.
+在评估结束后，程序会自动计算ROUGE-L指标并显示最终结果。
 
 
-#### Inference (Prediction)
-To do inference on the DuReader testset with the provided model parameters, please run: 
+### 预测
+通过运行以下命令，开发者可以利用上面提供的模型在DuReader 2.0测试集进行预测：
 
 ```
 sh run.sh --predict  --load_dir  ../data/saved_model --testset ../data/extracted/testset/zhidao.test.json ../data/extracted/testset/search.test.json
 ```
-The predicted answers will be saved in the folder `data/results`.
+模型预测的答案将被保存在`data/results`文件夹中。
 
 
+### 训练
+如果开发者希望重新训练模型参数，可以参考本章节步骤。
 
-#### Training
-
-Before training the model, you need to prepare the vocabulary for the dataset and create the folders that will be used for storing the models and the results. You can run the following command for the preparation:
+在模型训练开始之前，需要先运行以下命令来生成词表以及创建一些必要的文件夹，用于存放模型参数等：
 
 ```
 sh run.sh --prepare --trainset ../data/extracted/trainset/zhidao.train.json ../data/extracted/trainset/search.train.json --devset ../data/extracted/devset/zhidao.dev.json ../data/extracted/devset/search.dev.json --testset ../data/extracted/testset/zhidao.test.json ../data/extracted/testset/search.test.json
 ```
+建立好的词表会存放在`data/vocab`文件夹中。
 
-To start training on the DuReader trainset, please run the following command:
+然后运行下面的命令，即可开始训练:
 
 ```
 sh run.sh --train --pass_num 5 --trainset ../data/extracted/trainset/zhidao.train.json ../data/extracted/trainset/search.train.json --devset ../data/extracted/devset/zhidao.dev.json ../data/extracted/devset/search.dev.json
 ```
-This will start the training process with 5 epochs. The trained model will be evaluated automatically after each epoch, and a folder named by the epoch ID will be created under the folder `data/models`, in which the model parameters are saved. If you need to change the default hyper-parameters, e.g. initial learning rate and hidden size, please run the commands with the specific arguments. 
+以上参数配置会对模型进行5轮训练，并在每轮结束后利用验证集自动进行评估。每轮过后，程序会自动将模型参数保存到`data/models`文件夹当中，并以该轮的ID命名。
+
+如果开发者需要改变模型训练时的超参数， 例如初始学习率、隐层维度等，可以通过指定以下参数来实现： 
 
 ```
 sh run.sh --train --pass_num 5 --learning_rate 0.00001 --hidden_size 100 --trainset ../data/extracted/trainset/zhidao.train.json ../data/extracted/trainset/search.train.json --devset ../data/extracted/devset/zhidao.dev.json ../data/extracted/devset/search.dev.json
 ```
 
-More arguments can be found in `paddle/args.py`.
+更多参数配置可在`paddle/args.py`中找到。
 
 
-#### Submit the test results
-Once you train a model that is tuned on the dev set, we highly recommend you submit the predictions on test set to the site of DuReader for evaluation purpose. To get inference file on test set:
+### 提交测试集结果
+当开发者通过调参、修改模型结构得到更好的结果后，可以将DuReader 2.0测试集的预测结果提交到[官网](http://ai.baidu.com/broad/submission?dataset=dureader)来进行评测。在提交结果之前，请确保以下几点：
 
-1. make sure the training is over.
-2. select the best model under `data/models` according to the training log.
-3. predict the results on test set.
-4. [submit the prediction result file](http://ai.baidu.com/broad/submission?dataset=dureader).
+1. 训练已经全部结束；
+2. 通过训练日志在`data/models`文件夹中选择在验证集表现最佳的模型；
+3. 通过上面章节描述的方法在测试集上进行预测，并得到完整结果。
 
 
 # 进阶使用
@@ -217,7 +220,7 @@ DuReader数据集中每个样本都包含若干文档(documents)，每个文档�
 
 # 其他
 
-### Copyright and License
+## Copyright and License
 Copyright 2017 Baidu.com, Inc. All Rights Reserved
 
 Licensed under the Apache License, Version 2.0 (the "License");
@@ -232,6 +235,6 @@ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 See the License for the specific language governing permissions and
 limitations under the License.
 
-### 如何贡献代码
+## 如何贡献代码
 
 我们欢迎开发者向DuReader基线系统贡献代码。如果您开发了新功能，发现了bug……欢迎提交Pull request与issue到Github。
